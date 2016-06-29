@@ -19,12 +19,10 @@
 
 - (void)closeAnimation:(animationCompletion)completion
 {
-    
 }
 
 - (void)openAnimation:(animationCompletion)completion
 {
-    
 }
 
 /**
@@ -54,7 +52,19 @@
 
 @end
 
+@interface RotatedView ()
+
+@property (nonatomic) RotatedView *backView;
+@property (nonatomic, assign) BOOL hiddenAfterAnimation;
+
+@end
+
 @implementation RotatedView
+
+- (void)awakeFromNib
+{
+    _hiddenAfterAnimation = NO;
+}
 
 - (void)rotatedX:(CGFloat)angle
 {
@@ -72,16 +82,76 @@
     return transform;
 }
 
-@end
+- (void)addBackView:(CGFloat)height color:(UIColor *)color
+{
+    RotatedView *view = [[RotatedView alloc] initWithFrame:CGRectZero];
+    view.backgroundColor = color;
+    view.layer.anchorPoint = CGPointMake(0.5, 1);
+    view.layer.transform = [self transform3d];
+    view.translatesAutoresizingMaskIntoConstraints = FALSE;
+    [self addSubview:view];
+    self.backView = view;
+    
+    [view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1.0 constant:height]];
+    
+    NSLayoutConstraint *top = [NSLayoutConstraint constraintWithItem:view
+                                                          attribute:NSLayoutAttributeTop
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self
+                                                          attribute:NSLayoutAttributeTop
+                                                         multiplier:1.0
+                                                           constant:self.bounds.size.height - height + height / 2];
+    NSLayoutConstraint *leading = [NSLayoutConstraint constraintWithItem:view
+                                                          attribute:NSLayoutAttributeLeading
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self
+                                                          attribute:NSLayoutAttributeLeading
+                                                         multiplier:1.0
+                                                           constant:0];
+    NSLayoutConstraint *trailing = [NSLayoutConstraint constraintWithItem:view
+                                                          attribute:NSLayoutAttributeTrailing
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self
+                                                          attribute:NSLayoutAttributeTrailing
+                                                         multiplier:1.0
+                                                           constant:0];
+    
+    [self addConstraints:@[top, leading, trailing]];
+}
 
-@implementation RotatedView (Folding)
+-(void)foldingAnimation:(NSString *)timing from:(CGFloat)from to:(CGFloat)to delay:(NSTimeInterval)delay  duration:(NSTimeInterval)durtion hidden:(BOOL)hidden
+{
+    CABasicAnimation *rotateAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.x"];
+    
+    rotateAnimation.timingFunction =[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+    rotateAnimation.fromValue = [NSNumber numberWithFloat:from];
+    rotateAnimation.toValue = [NSNumber numberWithFloat:to];
+    rotateAnimation.duration = durtion;
+    rotateAnimation.delegate = self;
+    rotateAnimation.fillMode = kCAFillModeForwards;
+    rotateAnimation.removedOnCompletion = FALSE;
+    rotateAnimation.beginTime = CACurrentMediaTime() + delay;
+    
+    _hiddenAfterAnimation = hidden;
+    
+    [self.layer addAnimation:rotateAnimation forKey:@"rotation.x"];
+}
 
+#pragma mark - override
 
+- (void)animationDidStart:(CAAnimation *)anim
+{
+    self.layer.shouldRasterize = YES;
+    self.alpha = 1;
+}
 
-@end
-
-@implementation UIView (Snapshot)
-
-
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+{
+    if (_hiddenAfterAnimation) {
+        self.alpha = 0;
+    }
+    [self.layer removeAllAnimations];
+    self.layer.shouldRasterize = NO;
+}
 
 @end

@@ -30,4 +30,8 @@ typedef void (^animationCompletion)(NSError *error);
 
 @interface RotatedView : UIView
 
+- (void)addBackView:(CGFloat)height color:(UIColor *)color;
+
+-(void)foldingAnimation:(NSString *)timing from:(CGFloat)from to:(CGFloat)to delay:(NSTimeInterval)delay  duration:(NSTimeInterval)durtion hidden:(BOOL)hidden;
+
 @end
