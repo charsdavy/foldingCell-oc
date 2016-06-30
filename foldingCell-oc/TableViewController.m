@@ -27,8 +27,8 @@ static const CGFloat kOpenCellHeight = 488;
     // Do any additional setup after loading the view, typically from a nib.
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.tableView registerNib:[UINib nibWithNibName:NSStringFromClass([FoldingCell class]) bundle:nil] forCellReuseIdentifier:@"foldingcell"];
-    heightArray=[NSMutableArray array];
-    for (int i=0; i<10; i++) {
+    heightArray = [NSMutableArray array];
+    for (int i = 0; i < 10; i++) {
         [heightArray addObject:[NSNumber numberWithFloat:kCloseCellHeight]];
     }
 }
@@ -46,13 +46,15 @@ static const CGFloat kOpenCellHeight = 488;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     FoldingCell *cell = [tableView dequeueReusableCellWithIdentifier:@"foldingcell" forIndexPath:indexPath];
-
+    if (!cell) {
+        cell = [[FoldingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"foldingcell"];
+    }
     if ([heightArray[indexPath.row] floatValue] == kCloseCellHeight) {
         [cell selectedAnimation:NO animation:NO completion:nil];
     } else {
         [cell selectedAnimation:YES animation:NO completion:nil];
     }
-
+    
     return cell;
 }
 
@@ -61,7 +63,7 @@ static const CGFloat kOpenCellHeight = 488;
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     FoldingCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     if ([cell isAnimating]) return;
-
+    
     CGFloat durtion = 0.0;
     if ([heightArray[indexPath.row] floatValue] == kCloseCellHeight) {
         [heightArray replaceObjectAtIndex:indexPath.row withObject:[NSNumber numberWithFloat:kOpenCellHeight]];
