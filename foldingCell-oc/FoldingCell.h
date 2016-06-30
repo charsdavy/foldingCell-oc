@@ -20,18 +20,34 @@ typedef NS_ENUM (NSInteger,  FCAnimationType) {
 };
 
 typedef void (^animationCompletion)(NSError *error);
-
-@interface FoldingCell : UITableViewCell
-
-/** Open or close cell */
-- (void)selectedAnimation:(BOOL)selected animation:(BOOL)animated completion:(animationCompletion)completion;
-
-@end
+typedef void (^foldTapHandler)();
 
 @interface RotatedView : UIView
 
-- (void)addBackView:(CGFloat)height color:(UIColor *)color;
+@property (nonatomic) RotatedView *backView;
+
+- (void)addBackViewHeight:(CGFloat)height color:(UIColor *)color;
 
 -(void)foldingAnimation:(NSString *)timing from:(CGFloat)from to:(CGFloat)to delay:(NSTimeInterval)delay  duration:(NSTimeInterval)durtion hidden:(BOOL)hidden;
+
+@end
+
+@interface FoldingCell : UITableViewCell
+
+@property (weak, nonatomic) IBOutlet RotatedView *foregroundView;
+@property (weak, nonatomic) IBOutlet UIView *containerView;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *foregroundTopConstraint;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *containerViewTopConstraint;
+@property (weak, nonatomic) IBOutlet UIImageView *coverImageView;
+
+@property (weak, nonatomic) IBOutlet UIImageView *foldTestImageView;
+@property (weak, nonatomic) IBOutlet UILabel *nameLabel;
+
+- (BOOL)isAnimating;
+- (CGFloat)returnSumTime;
+- (void)fold_imageTap:(foldTapHandler)handler;
+
+/** Open or close cell */
+- (void)selectedAnimation:(BOOL)selected animation:(BOOL)animated completion:(animationCompletion)completion;
 
 @end
